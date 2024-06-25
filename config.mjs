@@ -1,30 +1,40 @@
-import path from "path";
-import { fileURLToPath } from "url";
-import HtmlWebpackPlugin from "html-webpack-plugin";
+import path from 'path';
+import { fileURLToPath } from 'url';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import rspack from '@rspack/core';
+import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const isRunningWebpack = !!process.env.WEBPACK;
 const isRunningRspack = !!process.env.RSPACK;
 if (!isRunningRspack && !isRunningWebpack) {
-  throw new Error("Unknown bundler");
+  throw new Error('Unknown bundler');
 }
 
 /**
  * @type {import('webpack').Configuration | import('@rspack/cli').Configuration}
  */
 const config = {
-  mode: "development",
+  mode: 'production',
   devtool: false,
   entry: {
-    main: "./src/index",
+    main: './src/index',
   },
-  plugins: [new HtmlWebpackPlugin()],
+  plugins: [
+    new HtmlWebpackPlugin(),
+    isRunningRspack
+      ? new rspack.CssExtractRspackPlugin()
+      : new MiniCssExtractPlugin(),
+  ],
   output: {
     clean: true,
     path: isRunningWebpack
-      ? path.resolve(__dirname, "webpack-dist")
-      : path.resolve(__dirname, "rspack-dist"),
-    filename: "[name].js",
+      ? path.resolve(__dirname, 'webpack-dist')
+      : path.resolve(__dirname, 'rspack-dist'),
+    filename: '[name].js',
+  },
+  optimization: {
+    concatenateModules: true,
   },
   experiments: {
     css: true,
